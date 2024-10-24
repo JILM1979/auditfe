@@ -1,38 +1,59 @@
-.App {
-  text-align: center;
+body {
+  background-color: #f9f3e3; /* Light beige background */
+  font-family: 'Arial', sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+div {
+  max-width: 600px; /* Set a max width for the container */
+  margin: 20px auto; /* Center the div */
+  padding: 20px; /* Padding inside the div */
+  background-color: #fff; /* White background for the content area */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+p {
+  font-size: 16px;
+  color: #5a4e3b; /* Darker shade for text */
+  margin: 10px 0; /* Spacing between paragraphs */
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+h2 {
+  font-size: 24px;
+  color: #d4af37; /* Gold color for headings */
+  margin-bottom: 20px; /* Space below the heading */
 }
 
-.App-link {
-  color: #61dafb;
+button {
+  background-color: #d4af37; /* Gold button background */
+  color: #fff; /* White text */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Rounded button corners */
+  padding: 10px 15px; /* Padding inside the button */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Button text size */
+  transition: background-color 0.3s; /* Transition for hover effect */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button:hover {
+  background-color: #c59d30; /* Darker gold on hover */
+}
+
+input {
+  width: calc(100% - 20px); /* Full width inputs with padding */
+  padding: 10px; /* Padding inside inputs */
+  margin: 10px 0; /* Space between inputs */
+  border: 1px solid #d4af37; /* Gold border */
+  border-radius: 5px; /* Rounded corners for inputs */
+  font-size: 16px; /* Input text size */
+}
+
+input::placeholder {
+  color: #b8a700; /* Placeholder text color */
+  opacity: 0.7; /* Slightly transparent placeholder */
+}
+
+input:focus {
+  border-color: #a78f00; /* Darker gold border on focus */
+  outline: none; /* Remove outline */
 }
