@@ -186,10 +186,10 @@ function App() {
 
             <h2 className="heading">Limited Resources</h2>
             {loading ? (
-        <div className="loading-container">
-          <img src="/loading.gif" alt="Loading..." className="loading-gif" />
-        </div>
-      )  : (
+              <div className="loading-container">
+                <img src="/loading.gif" alt="Loading..." className="loading-gif" />
+              </div>
+            ) : (
               <ul className="list">
                 {limitedResources.map((resource) => (
                   <li key={resource.idResource} className="list-item">
@@ -219,29 +219,32 @@ function App() {
             {LRregistered && <p>LR registered correctly</p>}
             <p>__________________________________________________________</p>
 
-            {!ownerRegistered && <button onClick={registerOwner}>Register Owner</button>}
-            {ownerRegistered && <p>You are an Interaction Creator registered!</p>}
-
-            <h2>Create Interaction</h2>
-            <input
-              type="number"
-              value={resourceId}
-              onChange={(e) => setResourceId(e.target.value)}
-              placeholder="Resource ID"
-            />
-            <input
-              type="text"
-              value={toAddress}
-              onChange={(e) => setToAddress(e.target.value)}
-              placeholder="To Address"
-            />
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
-            />
-            <button onClick={createInteraction}>Create Interaction</button>
+            {!ownerRegistered && <button onClick={registerOwner}>Register as Interaction Creator</button>}
+            {ownerRegistered && (
+              <div>
+                <p>You are an Interaction Creator registered!</p>
+                <h2>Create Interaction</h2>
+                <input
+                  type="number"
+                  value={resourceId}
+                  onChange={(e) => setResourceId(e.target.value)}
+                  placeholder="Resource ID"
+                />
+                <input
+                  type="text"
+                  value={toAddress}
+                  onChange={(e) => setToAddress(e.target.value)}
+                  placeholder="To Address"
+                />
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Description"
+                />
+                <button onClick={createInteraction}>Create Interaction</button>
+              </div>
+            )}
           </div>
         )}
       </header>
