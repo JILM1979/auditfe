@@ -4,96 +4,9 @@ import { auditABI } from "./auditABI";
 import './App.css';
 
 // Define your contract address and ABI here
-const CONTRACT_ADDRESS = '0x813035D03f6E28b1804dcCb26A83E2B09A7EE4E6'; // Replace with your deployed contract address
+const CONTRACT_ADDRESS = '0x1FFeDa02Edbd2B88867A29D025a8509A177FE33b'; // Replace with your deployed contract address
 const CONTRACT_ABI = auditABI;
-/*
-const CONTRACT_ABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_numResurces",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "numLimitedResources",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      }
-    ],
-    "name": "registerOwner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "idResource",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "descrption",
-        "type": "string"
-      }
-    ],
-    "name": "createInteraction",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_address",
-        "type": "address"
-      }
-    ],
-    "name": "getUserInteractionCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-*/
+
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
@@ -101,6 +14,9 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [numLimitedResources, setNumLimitedResources] = useState(0);
   const [ownerRegistered, setOwnerRegistered] = useState(false);
+  const [LRregistered, setLRregistered] = useState(false);
+
+  
 
 
   //const [currentAccount, setCurrentAccount] = useState(null);
@@ -110,6 +26,9 @@ function App() {
   const [resourceId, setResourceId] = useState(0);
   const [toAddress, setToAddress] = useState("");
   const [description, setDescription] = useState("");
+  const [dappOwner, setDappOwner] = useState("");
+  const [lrOwner, setlrOwner] = useState("");
+  const [lrDescription, setlrDescription] = useState("");
 
 
   // Connect MetaMask wallet
@@ -149,7 +68,7 @@ function App() {
     if (!contract || !currentAccount) return;
 
     try {
-      const tx = await contract.registerOwner(currentAccount);
+      const tx = await contract.registerInteractionOwner(currentAccount);
       await tx.wait();  // Wait for the transaction to be mined
       setOwnerRegistered(true);
       console.log('Owner registered:', currentAccount);
@@ -175,10 +94,39 @@ function App() {
   const fetchLimitedResources = async () => {
     //const contract = await getContract();
     const numResources = await contract.numLimitedResources();
-    setNumLimitedResources(numResources.toNumber());
+    setNumLimitedResources(Number(numResources));
+    console.log('Limited resources:', numResources);
   };
 
+  const getDappOwner = async () => {
+    const downer = await contract.dappOwner();
+    console.log('Dapp Owner:', downer);
+    setDappOwner(downer);
 
+    const interactionCreator = await contract.owners(currentAccount);
+    console.log('Is ', currentAccount, " interactionCreator? " , interactionCreator );
+    setOwnerRegistered(interactionCreator);
+  };
+
+  // Create a new interaction
+  const createLR = async () => {
+    setLRregistered(false);
+    if (!contract || !currentAccount) return;
+
+    try {
+      const tx = await contract.createLimitedResource(lrOwner, lrDescription);
+      await tx.wait();  // Wait for the transaction to be mined
+      setLRregistered(true);
+      fetchLimitedResources();
+      console.log('Limited Resource created:', currentAccount);
+      alert("Limited Resource created!");
+    } catch (error) {
+      console.error('Error registering owner:', error);
+    }
+
+    //    await contract.createLimitedResource(lrOwner, lrDescription);
+//    alert("Limited Resource created!");
+  };
 
   // Create a new interaction
   const createInteraction = async () => {
@@ -186,9 +134,12 @@ function App() {
     await contract.createInteraction(currentAccount, resourceId, toAddress, description);
     alert("Interaction created!");
   };
+
   useEffect(() => {
+
     if (currentAccount && contract) {
       // Optionally, you can fetch additional data or setup listeners here
+      getDappOwner();
     }
   }, [currentAccount, contract]);
 
@@ -203,11 +154,31 @@ function App() {
 
         {currentAccount && (
           <div>
-            <p>Connected account: {currentAccount}</p>
+            <p>SC address: {CONTRACT_ADDRESS}</p>
+            <p>SC Owner: {dappOwner}</p>
+
+            <p>Interaction Creator: {currentAccount}</p>
             <p>Number of Limited Resources: {numLimitedResources}</p>
 
-            <button onClick={registerOwner}>Register Owner</button>
-            {ownerRegistered && <p>Owner registered successfully!</p>}
+            <h2>Create Limited Resource</h2>
+            <input
+              type="text"
+              value={lrOwner}
+              onChange={(e) => setlrOwner(e.target.value)}
+              placeholder="LR Owner  Address"
+            />
+            <input
+              type="text"
+              value={lrDescription}
+              onChange={(e) => setlrDescription(e.target.value)}
+              placeholder="Description"
+            />
+            <button onClick={createLR}>Create Limited Resource</button>
+            {LRregistered && <p>LR registered correctly</p>}
+            <p>__________________________________________________________</p>
+            
+            {!ownerRegistered && <button onClick={registerOwner}>Register Owner</button>}
+            {ownerRegistered && <p>You are an Interaction Creator registered!</p>}
 
             <h2>Create Interaction</h2>
             <input
