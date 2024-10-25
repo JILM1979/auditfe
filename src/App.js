@@ -4,7 +4,7 @@ import { auditABI } from "./auditABI";
 import './App.css';
 
 // Define your contract address and ABI here
-const CONTRACT_ADDRESS = '0x1FFeDa02Edbd2B88867A29D025a8509A177FE33b'; // Replace with your deployed contract address
+const CONTRACT_ADDRESS = '0x9AF4B12c117FA769106530ccE921B0e0480E716b'; // Replace with your deployed contract address
 const CONTRACT_ABI = auditABI;
 
 
@@ -32,7 +32,11 @@ function App() {
 
   const [limitedResources, setLimitedResources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ownerSession, setOwnerSession] = useState(false);
 
+
+  const [loadingInteractions, setLoadingInteractions] = useState(true);
+  const [userInteractions, setUserInteractions] = useState([]);
 
   // Connect MetaMask wallet
   const connectWallet = async () => {
@@ -92,6 +96,11 @@ function App() {
     const downer = await contract.dappOwner();
     console.log('Dapp Owner:', downer);
     setDappOwner(downer);
+    console.log("downer==currentAccount -> ", downer == currentAccount);
+    if (downer.toLowerCase() === currentAccount.toLowerCase()) {
+      setOwnerSession(true);
+      console.log("Welcome Master!");
+    }
 
     const interactionCreator = await contract.owners(currentAccount);
     console.log('Is ', currentAccount, " interactionCreator? ", interactionCreator);
@@ -122,8 +131,9 @@ function App() {
   // Create a new interaction
   const createInteraction = async () => {
     //const contract = await getContract();
-    await contract.createInteraction(currentAccount, resourceId, toAddress, description);
+    await contract.createInteraction(resourceId, toAddress, description);
     alert("Interaction created!");
+    getUserInteractions();
   };
 
 
@@ -155,6 +165,37 @@ function App() {
     setLoading(false);
 
   };
+  const getUserInteractions = async () => {
+    setLoadingInteractions(true);
+    try {
+      // Fetch total number of LimitedResources
+      const numUserInteractions = await contract.getUserInteractionCount(currentAccount);
+
+      // Initialize an array to store resource data
+      const interactions = [];
+
+      for (let i = 0; i < numUserInteractions; i++) {
+        console.log('currentAccount:', currentAccount);
+        console.log('i:', i);
+
+        const interaction = await contract.getUserInteractionByIndex(currentAccount, 1 + i);
+        console.log('interaction:', interaction);
+
+        console.log('interaction.resoruceId:', interaction.resoruceId);
+        interactions.push({
+          resoruceId: interaction[0].toString(),
+          description: interaction[1],
+          to: interaction[2],
+          timestamp: interaction[3].toString()
+        });
+      }
+
+      setUserInteractions(interactions);
+    } catch (error) {
+      console.error("Error fetching getUserInteractions:", error);
+    }
+    setLoadingInteractions(false);
+  };
 
   useEffect(() => {
 
@@ -162,7 +203,7 @@ function App() {
       // Optionally, you can fetch additional data or setup listeners here
       getDappOwner();
       getAllLR();
-
+      getUserInteractions();
 
     }
   }, [currentAccount, contract]);
@@ -178,12 +219,7 @@ function App() {
 
         {currentAccount && (
           <div>
-            <p>SC address: {CONTRACT_ADDRESS}</p>
-            <p>SC Owner: {dappOwner}</p>
-
-            <p>Interaction Creator: {currentAccount}</p>
-            <p>Number of Limited Resources: {numLimitedResources}</p>
-
+          
             <h2 className="heading">Limited Resources</h2>
             {loading ? (
               <div className="loading-container">
@@ -202,21 +238,25 @@ function App() {
               </ul>
             )}
 
-            <h2>Create Limited Resource</h2>
-            <input
-              type="text"
-              value={lrOwner}
-              onChange={(e) => setlrOwner(e.target.value)}
-              placeholder="LR Owner  Address"
-            />
-            <input
-              type="text"
-              value={lrDescription}
-              onChange={(e) => setlrDescription(e.target.value)}
-              placeholder="Description"
-            />
-            <button onClick={createLR}>Create Limited Resource</button>
-            {LRregistered && <p>LR registered correctly</p>}
+            {ownerSession && (
+              <div>
+                <h2>Create Limited Resource</h2>
+                <input
+                  type="text"
+                  value={lrOwner}
+                  onChange={(e) => setlrOwner(e.target.value)}
+                  placeholder="LR Owner  Address"
+                />
+                <input
+                  type="text"
+                  value={lrDescription}
+                  onChange={(e) => setlrDescription(e.target.value)}
+                  placeholder="Description"
+                />
+                <button onClick={createLR}>Create Limited Resource</button>
+                {LRregistered && <p>LR registered correctly</p>}
+              </div>
+            )}
             <p>__________________________________________________________</p>
 
             {!ownerRegistered && <button onClick={registerOwner}>Register as Interaction Creator</button>}
@@ -243,8 +283,34 @@ function App() {
                   placeholder="Description"
                 />
                 <button onClick={createInteraction}>Create Interaction</button>
+
+
+                {loadingInteractions ? (
+                  <div className="loading-container">
+                    <img src="/loading.gif" alt="Loading..." className="loading-gif" />
+                  </div>
+                ) : (
+                  <ul className="list">
+                    {userInteractions.map((interaction) => (
+                      <li key={interaction.resoruceId} className="list-item">
+                        <p>ResourceID: {interaction.resoruceId}</p>
+                        <p>Description: {interaction.description}</p>
+                        <p>To : {interaction.to}</p>
+                        <p>Timestamp: {interaction.timestamp}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
+            <p>__________________________________________________________</p>
+
+            <p>Number of Limited Resources: {numLimitedResources}</p>
+            <p>SC address: {CONTRACT_ADDRESS}</p>
+            <p>SC Owner: {dappOwner}</p>
+
+            <p>Interaction Creator: {currentAccount}</p>
+
           </div>
         )}
       </header>

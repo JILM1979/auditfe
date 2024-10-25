@@ -86,11 +86,6 @@ export const auditABI =  [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
         "name": "idResource",
         "type": "uint256"
