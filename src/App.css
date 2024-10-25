@@ -57,3 +57,47 @@ input:focus {
   border-color: #a78f00; /* Darker gold border on focus */
   outline: none; /* Remove outline */
 }
+
+.container {
+  background-color: #FFF8E1; /* Light gold background */
+  padding: 20px;
+  border-radius: 8px;
+  color: #B8860B; /* Dark gold text color */
+  font-family: Arial, sans-serif;
+}
+
+.heading {
+  font-size: 24px;
+  color: #DAA520; /* Gold color for heading */
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.loading {
+  color: #B8860B; /* Dark gold for loading text */
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.list-item {
+  background-color: #F5DEB3; /* Very light gold background for list items */
+  border: 1px solid #DAA520;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.loading-gif {
+  width: 50px;
+  height: 50px;
+}

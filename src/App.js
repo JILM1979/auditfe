@@ -16,7 +16,7 @@ function App() {
   const [ownerRegistered, setOwnerRegistered] = useState(false);
   const [LRregistered, setLRregistered] = useState(false);
 
-  
+
 
 
   //const [currentAccount, setCurrentAccount] = useState(null);
@@ -29,6 +29,9 @@ function App() {
   const [dappOwner, setDappOwner] = useState("");
   const [lrOwner, setlrOwner] = useState("");
   const [lrDescription, setlrDescription] = useState("");
+
+  const [limitedResources, setLimitedResources] = useState([]);
+  const [loading, setLoading] = useState(true);
 
 
   // Connect MetaMask wallet
@@ -76,20 +79,7 @@ function App() {
       console.error('Error registering owner:', error);
     }
   };
-  /*
-    // Example to create an interaction
-    const createInteraction = async (resourceId, toAddress, description) => {
-      if (!contract || !currentAccount) return;
-  
-      try {
-        const tx = await contract.createInteraction(currentAccount, resourceId, toAddress, description);
-        await tx.wait();  // Wait for the transaction to be mined
-        console.log('Interaction created for resource:', resourceId);
-      } catch (error) {
-        console.error('Error creating interaction:', error);
-      }
-    };
-  */
+
   // Fetch the number of limited resources from the contract
   const fetchLimitedResources = async () => {
     //const contract = await getContract();
@@ -104,7 +94,7 @@ function App() {
     setDappOwner(downer);
 
     const interactionCreator = await contract.owners(currentAccount);
-    console.log('Is ', currentAccount, " interactionCreator? " , interactionCreator );
+    console.log('Is ', currentAccount, " interactionCreator? ", interactionCreator);
     setOwnerRegistered(interactionCreator);
   };
 
@@ -120,12 +110,13 @@ function App() {
       fetchLimitedResources();
       console.log('Limited Resource created:', currentAccount);
       alert("Limited Resource created!");
+      getAllLR();
     } catch (error) {
       console.error('Error registering owner:', error);
     }
 
     //    await contract.createLimitedResource(lrOwner, lrDescription);
-//    alert("Limited Resource created!");
+    //    alert("Limited Resource created!");
   };
 
   // Create a new interaction
@@ -135,11 +126,44 @@ function App() {
     alert("Interaction created!");
   };
 
+
+  const getAllLR = async () => {
+    setLoading(true);
+    try {
+      // Fetch total number of LimitedResources
+      const numResources = await contract.numLimitedResources();
+
+      // Initialize an array to store resource data
+      const resources = [];
+
+      for (let i = 0; i < numResources; i++) {
+        const resource = await contract.limitedResources(i);
+
+        resources.push({
+          idResource: resource.idResource.toString(),
+          resouceDescription: resource.resouceDescription,
+          blocked: resource.blocked,
+          owner: resource.owner,
+        });
+      }
+
+      setLimitedResources(resources);
+    } catch (error) {
+      console.error("Error fetching limited resources:", error);
+    }
+
+    setLoading(false);
+
+  };
+
   useEffect(() => {
 
     if (currentAccount && contract) {
       // Optionally, you can fetch additional data or setup listeners here
       getDappOwner();
+      getAllLR();
+
+
     }
   }, [currentAccount, contract]);
 
@@ -160,6 +184,24 @@ function App() {
             <p>Interaction Creator: {currentAccount}</p>
             <p>Number of Limited Resources: {numLimitedResources}</p>
 
+            <h2 className="heading">Limited Resources</h2>
+            {loading ? (
+        <div className="loading-container">
+          <img src="/loading.gif" alt="Loading..." className="loading-gif" />
+        </div>
+      )  : (
+              <ul className="list">
+                {limitedResources.map((resource) => (
+                  <li key={resource.idResource} className="list-item">
+                    <p>ID: {parseInt(resource.idResource, 10) + 1}</p>
+                    <p>Description: {resource.resouceDescription}</p>
+                    <p>Blocked: {resource.blocked ? "Yes" : "No"}</p>
+                    <p>Owner: {resource.owner}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <h2>Create Limited Resource</h2>
             <input
               type="text"
@@ -176,7 +218,7 @@ function App() {
             <button onClick={createLR}>Create Limited Resource</button>
             {LRregistered && <p>LR registered correctly</p>}
             <p>__________________________________________________________</p>
-            
+
             {!ownerRegistered && <button onClick={registerOwner}>Register Owner</button>}
             {ownerRegistered && <p>You are an Interaction Creator registered!</p>}
 
